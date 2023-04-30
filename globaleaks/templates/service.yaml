@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-globaleaks
+spec:
+  selector:
+    app: {{ .Release.Name }}-globaleaks
+  ports:
+  - name: http
+    port: {{ .Values.service.port }}
+    targetPort: http
+  - name: https
+    port: {{ .Values.service.httpsPort }}
+    targetPort: https
+  type: {{ .Values.service.type }}

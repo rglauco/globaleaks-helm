@@ -1,0 +1,60 @@
+# Default values for globaleaks.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+global:
+  tenant: bcn
+
+  persistence:
+    enabled: true
+    size: 1Gi
+
+replicaCount: 1
+
+image:
+  repository: tsundokul/globaleaks
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 80
+  httpsPort: 443
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1000Mi
+  requests:
+    cpu: 500m
+    memory: 524Mi
+
+## The following settings are to configure the frequency of the liveness and readiness probes
+livenessProbe:
+    enabled: true
+    path: /#
+    scheme: HTTP
+    initialDelaySeconds: 30
+    failureThreshold: 10
+    timeoutSeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+
+readinessProbe:
+    enabled: true
+    path: /#
+    scheme: HTTP
+    initialDelaySeconds: 30
+    failureThreshold: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+    periodSeconds: 10
+
+startupProbe:
+    enabled: true
+    path: /#
+    scheme: HTTP
+    initialDelaySeconds: 30
+    failureThreshold: 60
+    periodSeconds: 5
+    timeoutSeconds: 5
+internalPort: 80
