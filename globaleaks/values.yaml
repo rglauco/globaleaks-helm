@@ -11,9 +11,14 @@ global:
 replicaCount: 1
 
 image:
-  repository: tsundokul/globaleaks
+  repository: glr
   tag: latest
   pullPolicy: IfNotPresent
+
+securityContext: 
+   #readOnlyRootFilesystem: true 
+   runAsNonRoot: true 
+   allowPrivilegeEscalation: false 
 
 service:
   type: NodePort

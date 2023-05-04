@@ -17,6 +17,10 @@ spec:
       - name: {{ .Release.Name }}-globaleaks
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        securityContext: 
+          #readOnlyRootFilesystem: true 
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false 
         resources:
           limits:
             cpu: {{ .Values.resources.limits.cpu }}
