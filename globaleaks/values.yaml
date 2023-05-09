@@ -33,7 +33,7 @@ resources:
     cpu: 500m
     memory: 524Mi
 
-## The following settings are to configure the frequency of the liveness and readiness probes
+## The following settings are to configure the frequency of the 
 livenessProbe:
     enabled: true
     path: /#

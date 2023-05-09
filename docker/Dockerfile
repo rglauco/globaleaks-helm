@@ -22,9 +22,10 @@ RUN chmod 02750 "$TORLOGDIR" && chown 103:root "$TORLOGDIR"
 RUN chown 103:root /var/lib/tor
 EXPOSE 8080
 EXPOSE 8443
+HEALTHCHECK --timeout=3s --start-period=60s \
+    CMD curl --fail localhost:80 || exit 1
 
 USER 103
-#CMD ["/usr/bin/python3" ,"/usr/bin/globaleaks", "--devel-mode", "--socks-host=tor", "--socks-port=9050", "--ip=0.0.0.0", "--user=globaleaks" ,"--working-path=/var/globaleaks/","-n"]
 
 COPY ./start ./entrypoint /
 
