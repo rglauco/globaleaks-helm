@@ -22,8 +22,8 @@ securityContext:
 
 service:
   type: NodePort
-  port: 80
-  httpsPort: 443
+  port: 8080
+  httpsPort: 8443
 
 resources:
   limits:
@@ -37,7 +37,8 @@ resources:
 livenessProbe:
     enabled: true
     path: /#
-    scheme: HTTP
+    scheme: HTTPS
+    port: 8443
     initialDelaySeconds: 30
     failureThreshold: 10
     timeoutSeconds: 5
@@ -47,7 +48,8 @@ livenessProbe:
 readinessProbe:
     enabled: true
     path: /#
-    scheme: HTTP
+    scheme: HTTPS
+    port: 8443
     initialDelaySeconds: 30
     failureThreshold: 10
     successThreshold: 1
@@ -57,9 +59,10 @@ readinessProbe:
 startupProbe:
     enabled: true
     path: /#
-    scheme: HTTP
+    scheme: HTTPS
+    port: 8443
     initialDelaySeconds: 30
     failureThreshold: 60
     periodSeconds: 5
     timeoutSeconds: 5
-internalPort: 80
+internalPort: 8443
