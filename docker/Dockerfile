@@ -1,31 +1,22 @@
-FROM debian:11
+FROM debian:12
 
 RUN apt-get update -q && \
     apt-get install -y gpg curl vim curl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-RUN echo "deb http://deb.globaleaks.org bullseye/" > /etc/apt/sources.list.d/globaleaks.list
+RUN echo "deb http://deb.globaleaks.org bookworm/" > /etc/apt/sources.list.d/globaleaks.list
 RUN curl -sS https://deb.globaleaks.org/globaleaks.asc | apt-key add -
 RUN apt-get update -q && \
     apt-get install -y globaleaks && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --chown=globaleaks:root torrc /etc/tor/
-#VOLUME [ "/var/globaleaks/" ]
-ENV TORPIDDIR=/var/run/tor
-ENV TORLOGDIR=/var/log/tor
-
-RUN mkdir -m 02755 "$TORPIDDIR" && chown 103:root "$TORPIDDIR"
-RUN chmod 02750 "$TORLOGDIR" && chown 103:root "$TORLOGDIR"
-
-RUN chown 103:root /var/lib/tor
 EXPOSE 8080
 EXPOSE 8443
 HEALTHCHECK --timeout=3s --start-period=60s \
-    CMD curl --fail localhost:80 || exit 1
+    CMD curl --fail localhost:8080 || exit 1
 
-USER 103
+USER 1337
 
 COPY ./start ./entrypoint /
 

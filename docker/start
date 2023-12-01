@@ -4,5 +4,4 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
-/usr/bin/tor -f /etc/tor/torrc &
-/usr/bin/python3 /usr/bin/globaleaks --ip=0.0.0.0 --user=globaleaks --working-path=/var/globaleaks/ -n
+/usr/bin/python3 /usr/bin/globaleaks --ip=0.0.0.0 --working-path=/var/globaleaks/ -n
