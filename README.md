@@ -1,3 +1,8 @@
+## Docker build
+
+**create globaleaks docker image:**
+
+`cd docker && docker build -t globaleaks .`
 
 ## Deployment
 
