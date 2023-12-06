@@ -11,7 +11,7 @@ global:
 replicaCount: 1
 
 image:
-  repository: glr
+  repository: globaleaks
   tag: latest
   pullPolicy: IfNotPresent
 
