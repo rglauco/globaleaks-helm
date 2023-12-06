@@ -1,11 +1,14 @@
-FROM debian:12
+FROM debian:12-slim
 
 RUN apt-get update -q && \
-    apt-get install -y gpg curl vim curl && \
+    apt-get install -y wget lsb-release && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-RUN echo "deb http://deb.globaleaks.org bookworm/" > /etc/apt/sources.list.d/globaleaks.list
-RUN curl -sS https://deb.globaleaks.org/globaleaks.asc | apt-key add -
+
+RUN wget https://deb.globaleaks.org/install-globaleaks.sh
+RUN chmod +x install-globaleaks.sh
+RUN ./install-globaleaks.sh -y -n
+
 RUN apt-get update -q && \
     apt-get install -y globaleaks && \
     apt-get clean && \
@@ -13,14 +16,7 @@ RUN apt-get update -q && \
 
 EXPOSE 8080
 EXPOSE 8443
-HEALTHCHECK --timeout=3s --start-period=60s \
-    CMD curl --fail localhost:8080 || exit 1
 
 USER 1337
 
-COPY ./start ./entrypoint /
-
-WORKDIR /
-
-CMD ["/start"]
-ENTRYPOINT ["/entrypoint"]
+CMD ["/usr/bin/python3", "/usr/bin/globaleaks", "--working-path=/var/globaleaks/", "-n"]
