@@ -1,5 +1,1 @@
-docker/Dockerfile-glauco
-docker/Dockerfile-tor
-docker/start
-docker/entrypoint
-docker/torrc
+.docker/*
