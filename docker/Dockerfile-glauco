@@ -1,7 +1,7 @@
 FROM debian:12
 
 RUN apt-get update -q && \
-    apt-get install -y gpg curl vim curl && \
+    apt-get install -y gpg curl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 RUN echo "deb http://deb.globaleaks.org bookworm/" > /etc/apt/sources.list.d/globaleaks.list
@@ -13,8 +13,8 @@ RUN apt-get update -q && \
 
 EXPOSE 8080
 EXPOSE 8443
-HEALTHCHECK --timeout=3s --start-period=60s \
-    CMD curl --fail localhost:8080 || exit 1
+# HEALTHCHECK --timeout=3s --start-period=60s \
+#     CMD curl --fail localhost:8080 || exit 1
 
 USER 102
 
