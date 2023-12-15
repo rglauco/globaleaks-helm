@@ -3,5 +3,7 @@
 set -o errexit
 set -o pipefail
 set -o nounset
-
+if [ -f /var/globaleaks/globaleaks.pid ]; then
+    rm -r /var/globaleaks/globaleaks.pid
+fi
 /usr/bin/python3 /usr/bin/globaleaks --ip=0.0.0.0 --working-path=/var/globaleaks/ -n
