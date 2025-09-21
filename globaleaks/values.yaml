@@ -7,11 +7,12 @@ global:
   persistence:
     enabled: true
     size: 1Gi
+    storageClass: standard
 
 replicaCount: 1
 
 image:
-  repository: globaleaks
+  repository: globaleaks/globaleaks
   tag: latest
   pullPolicy: IfNotPresent
 

@@ -1,8 +1,9 @@
 ## Docker build
 
-**create globaleaks docker image:**
-
-`cd docker && docker build -t globaleaks .`
+**Setup with kind using the default storageClass "standard"**
+1. `mkdir /data`
+2. `kind create cluster --name mycluster --config kind.yml`
+3. `kubectl apply -f pv.yml`
 
 ## Deployment
 
