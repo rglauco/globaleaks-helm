@@ -1,6 +1,6 @@
-## Docker build
+## Setup
 
-**Setup with kind using the default storageClass "standard"**
+**using kind with the default storageClass "standard"**
 1. `mkdir /data`
 2. `kind create cluster --name mycluster --config kind.yml`
 3. `kubectl apply -f pv.yml`
@@ -8,6 +8,8 @@
 ## Deployment
 
 Entity name = globaleaks1
+
+keep in mind: in `templates/ingress.yaml` you can find `spec.rules.host: {{ .Release.Name }}.example.com` as example to redirect traffic from external to the appropriate container using https
 
 **Deploy**
 
