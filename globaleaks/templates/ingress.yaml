@@ -10,12 +10,16 @@ metadata:
     #nginx.ingress.kubernetes.io/secure-backends: "true"
     #nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
+  tls:
+  - hosts:
+    - {{ .Release.Name }}.example.com
+    secretName: globaleaks-tls   # TLS terminato qui
   rules:
   - host: {{ .Release.Name }}.example.com
     http:
       paths:
       - path: /?(.*)
-        pathType: Prefix
+        pathType: ImplementationSpecific
         backend:
           service:
             name: {{ .Release.Name }}-globaleaks

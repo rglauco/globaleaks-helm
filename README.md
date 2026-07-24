@@ -4,7 +4,15 @@
 1. `mkdir /data`
 2. `kind create cluster --name mycluster --config kind.yml`
 3. `kubectl apply -f pv.yml`
-
+4. ```
+   helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx && \
+   helm repo update && \
+   helm install ingress-nginx ingress-nginx/ingress-nginx \
+   --namespace ingress-nginx --create-namespace \
+   --set controller.admissionWebhooks.enabled=false \
+   --set controller.hostPort.enabled=true \
+   --set controller.service.type=NodePort
+   ```
 ## Deployment
 
 Entity name = globaleaks1

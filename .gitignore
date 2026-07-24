@@ -1,0 +1,7 @@
+# TLS material used for local testing - never commit private keys/certs
+*.key
+*.crt
+*.pem
+
+# OS / editor cruft
+.DS_Store

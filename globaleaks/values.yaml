@@ -13,7 +13,7 @@ replicaCount: 1
 
 image:
   repository: globaleaks/globaleaks
-  tag: latest
+  tag: "5.0.98"
   pullPolicy: IfNotPresent
 
 securityContext: 
