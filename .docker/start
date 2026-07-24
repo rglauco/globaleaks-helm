@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+/usr/bin/python3 /usr/bin/globaleaks --ip=0.0.0.0 --working-path=/var/globaleaks/ -n
