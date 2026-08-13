@@ -1,0 +1,34 @@
+name: Helm Chart E2E Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+
+  e2e:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install kind
+      run: |
+        curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.32.0/kind-linux-amd64
+        chmod +x ./kind
+        sudo mv ./kind /usr/local/bin/kind
+
+    - uses: azure/setup-kubectl@v4
+    - uses: azure/setup-helm@v4
+
+    - name: Add test hostnames to /etc/hosts
+      run: |
+        echo "127.0.0.1 azienda1.example.com" | sudo tee -a /etc/hosts
+        echo "127.0.0.1 globaleaks.example.com" | sudo tee -a /etc/hosts
+
+    - name: Run e2e test
+      run: ./e2e-test.sh

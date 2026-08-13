@@ -3,13 +3,12 @@ kind: Cluster
 nodes:
   - role: control-plane
     image: kindest/node:v1.36.1
-    extraMounts:
-      - hostPath: /data/
-        containerPath: /data
     extraPortMappings:
+      # Non-standard host ports to avoid clashing with other services already
+      # bound to 80/443 on the host (browser workflow: http(s)://<host>:1844x/).
       - containerPort: 80
-        hostPort: 80
+        hostPort: 18080
         protocol: TCP
       - containerPort: 443
-        hostPort: 443
+        hostPort: 18443
         protocol: TCP
