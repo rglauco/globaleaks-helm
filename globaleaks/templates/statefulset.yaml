@@ -1,7 +1,12 @@
+{{- if gt (.Values.replicaCount | int) 1 }}
+{{- fail "replicaCount > 1 is not supported: GlobaLeaks does not support multiple instances sharing the single ReadWriteOnce PVC created by this chart" }}
+{{- end }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ .Release.Name }}-globaleaks
+  labels:
+    {{- include "globaleaks.labels" . | nindent 4 }}
 spec:
   serviceName: {{ .Release.Name }}-globaleaks
   replicas: {{ .Values.replicaCount }}
@@ -12,15 +17,14 @@ spec:
     metadata:
       labels:
         app: {{ .Release.Name }}-globaleaks
+        {{- include "globaleaks.labels" . | nindent 8 }}
     spec:
       containers:
       - name: {{ .Release.Name }}-globaleaks
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        securityContext: 
-          #readOnlyRootFilesystem: true 
-          runAsNonRoot: true
-          allowPrivilegeEscalation: false 
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
         resources:
           limits:
             cpu: {{ .Values.resources.limits.cpu }}
@@ -44,7 +48,7 @@ spec:
           httpGet:
             path: {{ .Values.startupProbe.path }}
             scheme: {{ .Values.startupProbe.scheme | upper }}
-            port: {{ .Values.internalPort }}
+            port: {{ .Values.startupProbe.port }}
           initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
           periodSeconds: {{ .Values.startupProbe.periodSeconds }}
           failureThreshold: {{ .Values.startupProbe.failureThreshold }}
@@ -54,8 +58,8 @@ spec:
         readinessProbe:
           httpGet:
             path: {{ .Values.readinessProbe.path }}
-            scheme: {{ .Values.startupProbe.scheme | upper }}
-            port: {{ .Values.internalPort }}
+            scheme: {{ .Values.readinessProbe.scheme | upper }}
+            port: {{ .Values.readinessProbe.port }}
           initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
           periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
           timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -66,8 +70,8 @@ spec:
         livenessProbe:
           httpGet:
             path: {{ .Values.livenessProbe.path }}
-            scheme: {{ .Values.startupProbe.scheme | upper }}
-            port: {{ .Values.internalPort }}
+            scheme: {{ .Values.livenessProbe.scheme | upper }}
+            port: {{ .Values.livenessProbe.port }}
           initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
           periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}

@@ -17,7 +17,13 @@
 
 Entity name = globaleaks1
 
-keep in mind: in `templates/ingress.yaml` you can find `spec.rules.host: {{ .Release.Name }}.example.com` as example to redirect traffic from external to the appropriate container using https
+The ingress defaults to host `{{ .Release.Name }}.example.com`; override it with `--set ingress.host=your.domain.tld` or disable the ingress entirely with `--set ingress.enabled=false`.
+
+The ingress terminates TLS using a secret named by `ingress.tlsSecretName` (default `globaleaks-tls`), which must already exist in the target namespace before install, this chart does not create it. Create it from an existing cert/key pair with:
+
+```
+kubectl create secret tls globaleaks-tls --cert=globaleaks.crt --key=globaleaks.key
+```
 
 **Deploy**
 

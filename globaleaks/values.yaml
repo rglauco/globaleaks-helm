@@ -9,6 +9,8 @@ global:
     size: 1Gi
     storageClass: standard
 
+# GlobaLeaks is not clusterable: this chart mounts a single ReadWriteOnce PVC,
+# so replicaCount must stay at 1.
 replicaCount: 1
 
 image:
@@ -66,4 +68,9 @@ startupProbe:
     failureThreshold: 60
     periodSeconds: 5
     timeoutSeconds: 5
-internalPort: 8443
+
+ingress:
+  enabled: true
+  # Hostname used for the ingress rule and TLS cert. Defaults to "<release-name>.example.com" when unset.
+  host: ""
+  tlsSecretName: globaleaks-tls

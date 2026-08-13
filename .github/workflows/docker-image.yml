@@ -16,3 +16,15 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build the Docker image
       run: docker build . --file docker/Dockerfile --tag globaleaks:$(date +%s)
+
+  helm-chart:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: azure/setup-helm@v4
+    - name: Lint Helm chart
+      run: helm lint globaleaks/
+    - name: Render Helm chart
+      run: helm template test globaleaks/

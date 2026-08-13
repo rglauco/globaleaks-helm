@@ -1,7 +1,11 @@
+{{- if .Values.ingress.enabled }}
+{{- $host := .Values.ingress.host | default (printf "%s.example.com" .Release.Name) }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Release.Name }}-globaleaks
+  labels:
+    {{- include "globaleaks.labels" . | nindent 4 }}
   annotations:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/rewrite-target: /$1
@@ -10,12 +14,13 @@ metadata:
     #nginx.ingress.kubernetes.io/secure-backends: "true"
     #nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
+  # TLS is terminated at the ingress; secretName must already exist in the namespace (see README).
   tls:
   - hosts:
-    - {{ .Release.Name }}.example.com
-    secretName: globaleaks-tls   # TLS terminato qui
+    - {{ $host }}
+    secretName: {{ .Values.ingress.tlsSecretName }}
   rules:
-  - host: {{ .Release.Name }}.example.com
+  - host: {{ $host }}
     http:
       paths:
       - path: /?(.*)
@@ -25,3 +30,4 @@ spec:
             name: {{ .Release.Name }}-globaleaks
             port:
               number: 8443
+{{- end }}
