@@ -66,15 +66,21 @@ for pvc in globaleaks1-pvc azienda1-pvc; do
 done
 
 check_host() {
-  local host="$1"
+  # ingress-nginx picks up new/changed Ingress objects asynchronously, so right
+  # after `helm install` returns (pod Ready) the controller may not have
+  # reloaded its config for that host yet - retry for a bit before failing.
+  local host="$1" retries=30 delay=2 code
   echo "==> checking https://$host:18443/"
-  local code
-  code="$(curl -k -s -o /dev/null -w '%{http_code}' --max-time 10 "https://$host:18443/")"
-  if [[ ! "$code" =~ ^(2|3)[0-9][0-9]$ ]]; then
-    echo "ERROR: $host returned HTTP $code" >&2
-    return 1
-  fi
-  echo "OK: $host returned HTTP $code"
+  for ((i = 1; i <= retries; i++)); do
+    code="$(curl -k -s -o /dev/null -w '%{http_code}' --max-time 5 "https://$host:18443/" || true)"
+    if [[ "$code" =~ ^(2|3)[0-9][0-9]$ ]]; then
+      echo "OK: $host returned HTTP $code (attempt $i/$retries)"
+      return 0
+    fi
+    sleep "$delay"
+  done
+  echo "ERROR: $host still returning HTTP $code after $((retries * delay))s" >&2
+  return 1
 }
 
 check_host globaleaks.example.com
