@@ -10,12 +10,14 @@ jobs:
 
   build:
 
+    # Disabled: the chart uses the official globaleaks/globaleaks image.
+    if: false
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file docker/Dockerfile --tag globaleaks:$(date +%s)
+      run: docker build . --file docker-deprecated/Dockerfile --tag globaleaks:$(date +%s)
 
   helm-chart:
 
