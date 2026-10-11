@@ -1,0 +1,91 @@
+name: New GlobaLeaks version
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Find latest stable GlobaLeaks tag
+      id: version
+      run: |
+        latest="$(curl -fsS 'https://hub.docker.com/v2/repositories/globaleaks/globaleaks/tags?page_size=100&ordering=last_updated' \
+          | jq -r '.results[].name' \
+          | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)"
+        current="$(grep -E '^\s+tag:' globaleaks/values.yaml | head -1 | sed -E 's/.*"(.*)".*/\1/')"
+        echo "latest=$latest current=$current"
+        echo "latest=$latest" >> "$GITHUB_OUTPUT"
+        if [[ -n "$latest" && "$latest" != "$current" && \
+              "$(printf '%s\n%s\n' "$current" "$latest" | sort -V | tail -1)" == "$latest" ]]; then
+          echo "update=true" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Skip if a PR for this version already exists
+      id: existing
+      if: steps.version.outputs.update == 'true'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        branch="bump-globaleaks-${{ steps.version.outputs.latest }}"
+        if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+          echo "Branch $branch already exists, nothing to do"
+        else
+          echo "new=true" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Bump image tag and appVersion
+      if: steps.existing.outputs.new == 'true'
+      run: |
+        v="${{ steps.version.outputs.latest }}"
+        sed -i -E "s/^(\s+tag:) \".*\"/\1 \"$v\"/" globaleaks/values.yaml
+        sed -i -E "s/^appVersion: \".*\"/appVersion: \"${v#v}\"/" globaleaks/Chart.yaml
+        git diff
+
+    - name: Install kind
+      if: steps.existing.outputs.new == 'true'
+      run: |
+        curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.32.0/kind-linux-amd64
+        chmod +x ./kind
+        sudo mv ./kind /usr/local/bin/kind
+
+    - uses: azure/setup-kubectl@v4
+      if: steps.existing.outputs.new == 'true'
+    - uses: azure/setup-helm@v4
+      if: steps.existing.outputs.new == 'true'
+
+    - name: Add test hostnames to /etc/hosts
+      if: steps.existing.outputs.new == 'true'
+      run: |
+        echo "127.0.0.1 azienda1.example.com" | sudo tee -a /etc/hosts
+        echo "127.0.0.1 globaleaks.example.com" | sudo tee -a /etc/hosts
+
+    - name: Run e2e test with the new version
+      if: steps.existing.outputs.new == 'true'
+      run: ./e2e-test.sh
+
+    - name: Open pull request
+      if: steps.existing.outputs.new == 'true'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        v="${{ steps.version.outputs.latest }}"
+        branch="bump-globaleaks-$v"
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git checkout -b "$branch"
+        git commit -am "chore: bump GlobaLeaks to $v"
+        git push origin "$branch"
+        gh pr create --base main --head "$branch" \
+          --title "chore: bump GlobaLeaks to $v" \
+          --body "Automated bump to GlobaLeaks $v. The e2e test passed with the new image."
