@@ -87,7 +87,11 @@ check_host globaleaks.example.com
 check_host azienda1.example.com
 
 echo "==> killing PID 1 in globaleaks1 to check restart with a stale pidfile"
-kubectl exec globaleaks1-globaleaks-0 -- kill -9 1 || true
+# PID 1 ignores signals sent from inside its own namespace, so kill the container
+# from the node (timeout 0 = immediate SIGKILL, pidfile left behind).
+NODE="${CLUSTER_NAME}-control-plane"
+docker exec "$NODE" sh -c \
+  'crictl stop --timeout 0 $(crictl ps -q --name globaleaks1-globaleaks)'
 sleep 5
 kubectl wait --for=condition=Ready pod/globaleaks1-globaleaks-0 --timeout=180s
 restarts="$(kubectl get pod globaleaks1-globaleaks-0 -o jsonpath='{.status.containerStatuses[0].restartCount}')"
