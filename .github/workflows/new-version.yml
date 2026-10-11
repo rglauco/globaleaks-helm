@@ -74,6 +74,10 @@ jobs:
       if: steps.existing.outputs.new == 'true'
       run: ./e2e-test.sh
 
+    - name: Run Envoy Gateway e2e test with the new version
+      if: steps.existing.outputs.new == 'true'
+      run: ./e2e-test-envoy.sh
+
     - name: Open pull request
       if: steps.existing.outputs.new == 'true'
       env:
@@ -88,4 +92,4 @@ jobs:
         git push origin "$branch"
         gh pr create --base main --head "$branch" \
           --title "chore: bump GlobaLeaks to $v" \
-          --body "Automated bump to GlobaLeaks $v. The e2e test passed with the new image."
+          --body "Automated bump to GlobaLeaks $v. The e2e tests (Ingress and Envoy Gateway) passed with the new image."
