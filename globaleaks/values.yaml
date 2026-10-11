@@ -78,3 +78,27 @@ ingress:
   # Hostname used for the ingress rule and TLS cert. Defaults to "<release-name>.example.com" when unset.
   host: ""
   tlsSecretName: globaleaks-tls
+
+# Gateway API alternative to the Ingress above (e.g. Envoy Gateway). Disabled by default;
+# the Gateway/GatewayClass are expected to already exist in the cluster.
+httpRoute:
+  enabled: false
+  # Defaults to ingress.host, then "<release-name>.example.com".
+  host: ""
+  # Required when enabled, e.g.:
+  # parentRefs:
+  # - name: eg
+  #   namespace: envoy-gateway-system
+  #   sectionName: https
+  parentRefs: []
+  redirect:
+    # Extra HTTPRoute redirecting HTTP -> HTTPS; parentRefs must point to the Gateway's HTTP listener.
+    enabled: false
+    parentRefs: []
+  backendTLS:
+    # GlobaLeaks listens on HTTPS: enable to make the gateway use TLS towards the backend.
+    enabled: true
+    # SNI/hostname to validate; defaults to the route host.
+    hostname: ""
+    # e.g. [{group: "", kind: ConfigMap, name: globaleaks-ca}]; falls back to the system CA bundle when empty.
+    caCertificateRefs: []
