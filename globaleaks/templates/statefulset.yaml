@@ -32,6 +32,11 @@ spec:
           requests:
             cpu: {{ .Values.resources.requests.cpu }}
             memory: {{ .Values.resources.requests.memory }}
+        # Remove only the stale pidfile (left behind if the container is killed and
+        # restarted in the same pod), keeping the rest of /run/globaleaks, then exec
+        # so globaleaks is PID 1 and receives SIGTERM.
+        command: ["/bin/sh", "-c",
+          "rm -f /run/globaleaks/globaleaks.pid; exec /usr/bin/python3 /usr/bin/globaleaks --working-path=/var/globaleaks/ -n"]
         env:
         - name: TENANT
           value: "{{ .Values.global.tenant }}"
@@ -43,6 +48,10 @@ spec:
         volumeMounts:
           - name: data
             mountPath: /var/globaleaks/
+          - name: run
+            mountPath: /run/globaleaks
+          - name: tmp
+            mountPath: /tmp
         {{- if .Values.startupProbe.enabled }}
         startupProbe:
           httpGet:
@@ -82,3 +91,10 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-pvc
+        # In-memory: /run/globaleaks holds the ramdisk with token markers that must never reach disk.
+        - name: run
+          emptyDir:
+            medium: Memory
+            sizeLimit: 16Mi
+        - name: tmp
+          emptyDir: {}

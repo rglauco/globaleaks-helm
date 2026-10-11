@@ -47,3 +47,20 @@ kubectl create secret tls globaleaks-tls --cert=globaleaks.crt --key=globaleaks.
 
 ---------
 Forked from https://github.com/pablovigo/globaleaks-helm
+
+## Resizing storage
+
+The data volume is a standalone PVC (`<release>-pvc`) sized by `global.persistence.size`. To grow it:
+
+1. Make sure the StorageClass allows expansion: `kubectl get sc <name> -o jsonpath='{.allowVolumeExpansion}'` must print `true`.
+2. Raise the value and upgrade (no pod recreation needed in most cases):
+
+   ```bash
+   helm upgrade <release> ./globaleaks -f globaleaks/values.yaml \
+     --set ingress.host=<host> --set global.tenant=<tenant> \
+     --set global.persistence.size=20Gi
+   ```
+
+3. Check progress with `kubectl describe pvc <release>-pvc`. If it shows `FileSystemResizePending`, restart the pod (`kubectl delete pod <release>-globaleaks-0`).
+
+Notes: volumes can only grow, never shrink; the default kind `standard` class (local-path) does not support expansion, so this can't be tested locally.

@@ -86,4 +86,15 @@ check_host() {
 check_host globaleaks.example.com
 check_host azienda1.example.com
 
+echo "==> killing PID 1 in globaleaks1 to check restart with a stale pidfile"
+kubectl exec globaleaks1-globaleaks-0 -- kill -9 1 || true
+sleep 5
+kubectl wait --for=condition=Ready pod/globaleaks1-globaleaks-0 --timeout=180s
+restarts="$(kubectl get pod globaleaks1-globaleaks-0 -o jsonpath='{.status.containerStatuses[0].restartCount}')"
+if [[ "$restarts" -lt 1 ]]; then
+  echo "ERROR: expected the container to have restarted (restartCount=$restarts)" >&2
+  exit 1
+fi
+check_host globaleaks.example.com
+
 echo "==> all checks passed"

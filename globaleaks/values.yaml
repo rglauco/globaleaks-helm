@@ -18,10 +18,14 @@ image:
   tag: "v5.0.98"
   pullPolicy: IfNotPresent
 
-securityContext: 
-   #readOnlyRootFilesystem: true 
-   runAsNonRoot: true 
-   allowPrivilegeEscalation: false 
+securityContext:
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]
+  seccompProfile:
+    type: RuntimeDefault
 
 service:
   type: NodePort
